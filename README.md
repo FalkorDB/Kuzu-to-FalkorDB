@@ -1,4 +1,4 @@
-# Kuzu to FalkorDB CSV Migration
+# Kuzu to FalkorDB Migration
 
 A 2 step process to migrate data from Kuzu graph database into FalkorDB.
 
