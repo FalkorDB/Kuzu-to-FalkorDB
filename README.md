@@ -1,12 +1,16 @@
-# Kuzu to FalkorDB CSV Exporter
+# Kuzu to FalkorDB CSV Migration
 
-A Python script that extracts data from a Kuzu graph database and converts it to FalkorDB-compatible CSV format for easy migration and data analysis.
+A 2 step process to migrate data from Kuzu graph database into FalkorDB.
+
 
 ## Overview
 
 This tool bridges the gap between Kuzu and FalkorDB by automatically discovering your database schema and exporting all nodes and relationships to properly formatted CSV files that can be imported into FalkorDB.
 
-## Features
+In order to fully migrate follow the documentation below to activate kuzu_to_falkordb_export.py to extract data from your current Kuzu graph database into csv files.
+Next you can use FalkorDB Rust loader https://github.com/FalkorDB/FalkorDB-Loader-RS to load these CSV files directly into FalkorDB.
+
+## Exporter Features
 
 - **Automatic Schema Discovery**: Dynamically discovers all node types and relationship types in your Kuzu database
 - **FalkorDB Compatibility**: Generates CSV files in the exact format expected by FalkorDB
@@ -15,12 +19,12 @@ This tool bridges the gap between Kuzu and FalkorDB by automatically discovering
 - **Comprehensive Export**: Exports both nodes and relationships with full metadata
 - **Schema Documentation**: Optional JSON schema file generation for documentation purposes
 
-## Requirements
+## Exporter Requirements
 
 - Python 3.6+
 - `kuzu` package
 
-## Installation
+## Exporter Installation
 
 1. Install the required dependencies:
 ```bash
@@ -33,7 +37,7 @@ git clone <repository-url>
 cd Kuzu-to-FalkorDB
 ```
 
-## Usage
+## Exporter Usage
 
 ### Basic Usage
 
@@ -63,7 +67,7 @@ python3 kuzu_to_falkordb_export.py --db network_it_smart_db --schema schema.json
 | `--schema` | Path to output schema JSON file | No | None |
 | `--output` | Output directory for CSV files | No | `_csv_` |
 
-## Output Structure
+## Exporter Output Structure
 
 The script generates the following files:
 
@@ -81,23 +85,11 @@ The script generates the following files:
 - `schema.json`: Contains metadata about the export process
 - Includes node types, relationship types, and file mappings
 
-## Relationship Mapping
+## Exporter Relationship Mapping
 
-The script intelligently maps Kuzu relationship names to standardized FalkorDB edge types:
+The script intelligently maps Kuzu relationship names to standardized FalkorDB edge types.
 
-| Kuzu Pattern | FalkorDB Type | Examples |
-|--------------|---------------|----------|
-| `*CONNECT*` | `CONNECTS` | `CONNECTS_NET`, `CONNECTS_INTERFACE` |
-| `*CONTAIN*` | `CONTAINS` | `CONTAINS_RACK`, `CONTAINS_ROUTER` |
-| `*DEPEND*` | `DEPENDS_ON` | `DEPENDS_SERVICE`, `DEPENDS_VERSION` |
-| `*INSTANCE*` | `INSTANCE` | `INSTANCE_OS_VER`, `INSTANCE_APP_SW` |
-| `*LISTEN*` | `LISTENS` | `LISTENS_APP`, `LISTENS_SVC` |
-| `*ROUTE*` | `ROUTES` | `ROUTES_MACHINE`, `ROUTES_NETWORK` |
-| `*RUN*` | `RUNS` | `RUNS_OS`, `RUNS_SVC` |
-| `*TYPE*` | `TYPE` | `HAS_TYPE` |
-| `*VERSION*` | `VERSION` | `HAS_VERSION_SVC` |
-
-## Label Enhancement
+## Exporter Label Enhancement
 
 The script enhances node labels with context for better FalkorDB compatibility:
 
@@ -105,7 +97,7 @@ The script enhances node labels with context for better FalkorDB compatibility:
 - Network zones become `Network:Zone`
 - Service software becomes `Software:Service`
 
-## Error Handling
+## Exporter Error Handling
 
 The script includes robust error handling:
 - Validates database path exists
@@ -113,7 +105,7 @@ The script includes robust error handling:
 - Continues export even if individual tables fail
 - Provides detailed progress and error messages
 
-## Example Output
+## Exporter Example Output
 
 After running the script, you'll see output similar to:
 ```
@@ -144,7 +136,7 @@ Schema: schema.json
 📊 Exported: 8 node types, 15 relationship types
 ```
 
-## Troubleshooting
+## Exporter Troubleshooting
 
 ### Common Issues
 
@@ -155,15 +147,6 @@ Schema: schema.json
 ### Debug Mode
 
 For additional debugging information, you can modify the script to include more verbose logging.
-
-## Contributing
-
-Feel free to submit issues and enhancement requests! When contributing:
-
-1. Follow the existing code style
-2. Add appropriate error handling
-3. Update documentation for new features
-4. Test with different database schemas
 
 ## License
 
