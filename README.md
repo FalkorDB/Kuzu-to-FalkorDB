@@ -33,7 +33,7 @@ pip3 install kuzu
 
 2. Download the script:
 ```bash
-git clone https://github.com/FalkorDB-POCs/Kuzu-to-FalkorDB.git
+git clone https://github.com/FalkorDB/Kuzu-to-FalkorDB.git
 cd Kuzu-to-FalkorDB
 ```
 
