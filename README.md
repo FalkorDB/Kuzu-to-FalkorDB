@@ -7,7 +7,7 @@ A 2 step process to migrate data from Kuzu graph database into FalkorDB.
 
 This tool bridges the gap between Kuzu and FalkorDB by automatically discovering your database schema and exporting all nodes and relationships to properly formatted CSV files that can be imported into FalkorDB.
 
-In order to fully migrate follow the documentation below to activate kuzu_to_falkordb_export.py to extract data from your current Kuzu graph database into csv files.
+In order to fully migrate, follow the documentation below to activate kuzu_to_falkordb_export.py to extract data from your current Kuzu graph database into csv files.
 Next you can use FalkorDB Rust loader https://github.com/FalkorDB/FalkorDB-Loader-RS to load these CSV files directly into FalkorDB.
 
 ## Exporter Features
