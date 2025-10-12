@@ -1,0 +1,13 @@
+# Requirements for kuzu_to_falkordb_export.py
+# Kuzu database Python client
+kuzu>=0.0.8
+
+# Standard library dependencies (included with Python):
+# - os
+# - sys 
+# - csv
+# - json
+# - argparse
+# - datetime
+# - pathlib
+# - typing
