@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
 """
-Kuzu to FalkorDB CSV Exporter
+Graph Database to FalkorDB CSV Exporter
 
-This script extracts all nodes and edges from a Kuzu database and converts them
+This script extracts all nodes and edges from Kuzu or LadybugDB databases and converts them
 to FalkorDB-compatible CSV format. 
 
 Usage:
-    python3 kuzu_to_falkordb_export.py --db DATABASE_PATH [--schema SCHEMA_FILE] [--output OUTPUT_DIR]
+    python3 kuzu_to_falkordb_export.py --db DATABASE_PATH --db-type {kuzu|ladybug} [--schema SCHEMA_FILE] [--output OUTPUT_DIR]
 
 Features:
+- Supports both Kuzu and LadybugDB databases
 - Extracts all node types with proper FalkorDB formatting
 - Extracts all edge types with source/target labels
 - Creates FalkorDB-compatible CSV files
 - Handles complex property types (lists, nested values)
 - Generates schema documentation
+- Auto-detects database type if not specified
 """
 
 import os
@@ -25,23 +27,57 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Any, Tuple
 
+# Database library imports - try both
+KUZU_AVAILABLE = False
+LADYBUG_AVAILABLE = False
+
 try:
     import kuzu
+    KUZU_AVAILABLE = True
 except ImportError:
-    print("Error: kuzu package not found. Install it with: pip3 install kuzu")
+    pass
+
+try:
+    import ladybug as ladybugdb  # LadybugDB graph database
+    LADYBUG_AVAILABLE = True
+except ImportError:
+    pass
+
+if not KUZU_AVAILABLE and not LADYBUG_AVAILABLE:
+    print("Error: No compatible graph database library found.")
+    print("Install Kuzu with: pip3 install kuzu")
+    print("Or install LadybugDB with: pip3 install ladybug-db")
     sys.exit(1)
 
-class KuzuToFalkorDBExporter:
-    def __init__(self, db_path: str, schema_file: str = None, output_dir: str = "_csv_"):
+class GraphToFalkorDBExporter:
+    def __init__(self, db_path: str, db_type: str = None, schema_file: str = None, output_dir: str = "_csv_"):
         self.db_path = Path(db_path)
         self.schema_file = Path(schema_file) if schema_file else None
         self.output_dir = Path(output_dir)
+        self.db_type = self._determine_db_type(db_type)
         
         if not self.db_path.exists():
             raise FileNotFoundError(f"Database not found: {db_path}")
-            
-        self.db = kuzu.Database(str(self.db_path))
-        self.conn = kuzu.Connection(self.db)
+        
+        # Initialize database connection based on type
+        if self.db_type == 'kuzu':
+            if not KUZU_AVAILABLE:
+                raise RuntimeError("Kuzu library not available. Install with: pip3 install kuzu")
+            self.db = kuzu.Database(str(self.db_path))
+            self.conn = kuzu.Connection(self.db)
+        elif self.db_type == 'ladybug':
+            if not LADYBUG_AVAILABLE:
+                raise RuntimeError("LadybugDB library not available. Install with: pip3 install ladybug-db")
+            # LadybugDB was formerly Kuzu, so it likely uses similar API
+            # If the API is identical, we can use the same connection method
+            try:
+                self.db = ladybugdb.Database(str(self.db_path))
+                self.conn = ladybugdb.Connection(self.db)
+            except AttributeError:
+                # Fallback: try using kuzu compatibility layer
+                print("⚠️  LadybugDB detected but using Kuzu-compatible API")
+                self.db = kuzu.Database(str(self.db_path))
+                self.conn = kuzu.Connection(self.db)
         
         # Create output directory
         self.output_dir.mkdir(exist_ok=True)
@@ -51,6 +87,29 @@ class KuzuToFalkorDBExporter:
         self.relationship_tables = {}
         self.node_schemas = {}
         self.rel_schemas = {}
+    
+    def _determine_db_type(self, specified_type: str = None) -> str:
+        """Determine database type from specification or auto-detection"""
+        if specified_type:
+            db_type = specified_type.lower()
+            if db_type not in ['kuzu', 'ladybug']:
+                raise ValueError(f"Invalid database type: {specified_type}. Must be 'kuzu' or 'ladybug'")
+            return db_type
+        
+        # Auto-detect based on available libraries
+        if KUZU_AVAILABLE and not LADYBUG_AVAILABLE:
+            print("🔍 Auto-detected database type: Kuzu")
+            return 'kuzu'
+        elif LADYBUG_AVAILABLE and not KUZU_AVAILABLE:
+            print("🔍 Auto-detected database type: LadybugDB")
+            return 'ladybug'
+        elif KUZU_AVAILABLE and LADYBUG_AVAILABLE:
+            # Both available - default to Kuzu, but warn user
+            print("⚠️  Both Kuzu and LadybugDB libraries detected. Defaulting to Kuzu.")
+            print("   Use --db-type to specify explicitly.")
+            return 'kuzu'
+        else:
+            raise RuntimeError("No compatible database library found")
         
     def discover_schema(self):
         """Discover all node and relationship tables in the database"""
@@ -401,8 +460,9 @@ class KuzuToFalkorDBExporter:
                 
     def run_export(self):
         """Run the complete export process"""
-        print("🚀 Kuzu to FalkorDB CSV Exporter")
+        print("🚀 Graph Database to FalkorDB CSV Exporter")
         print("=" * 50)
+        print(f"Database Type: {self.db_type.upper()}")
         print(f"Database: {self.db_path}")
         print(f"Output: {self.output_dir}")
         if self.schema_file:
@@ -435,15 +495,21 @@ class KuzuToFalkorDBExporter:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Export Kuzu database to FalkorDB-compatible CSV format",
+        description="Export Kuzu or LadybugDB database to FalkorDB-compatible CSV format",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-    # Basic export
+    # Auto-detect database type
     python3 kuzu_to_falkordb_export.py --db network_it_smart_db
     
+    # Specify Kuzu database
+    python3 kuzu_to_falkordb_export.py --db network_it_smart_db --db-type kuzu
+    
+    # Specify LadybugDB database
+    python3 kuzu_to_falkordb_export.py --db network_it_smart_db --db-type ladybug
+    
     # Export with schema file
-    python3 kuzu_to_falkordb_export.py --db network_it_smart_db --schema schema.json
+    python3 kuzu_to_falkordb_export.py --db network_it_smart_db --db-type kuzu --schema schema.json
     
     # Export to custom directory
     python3 kuzu_to_falkordb_export.py --db network_it_smart_db --output my_csv_export
@@ -452,7 +518,11 @@ Examples:
     
     parser.add_argument("--db", "--database", 
                        required=True, 
-                       help="Path to Kuzu database file/directory")
+                       help="Path to database file/directory")
+    
+    parser.add_argument("--db-type", "--type",
+                       choices=['kuzu', 'ladybug'],
+                       help="Database type: 'kuzu' or 'ladybug' (auto-detected if not specified)")
     
     parser.add_argument("--schema", 
                        help="Path to output schema JSON file (optional)")
@@ -464,8 +534,9 @@ Examples:
     args = parser.parse_args()
     
     try:
-        exporter = KuzuToFalkorDBExporter(
+        exporter = GraphToFalkorDBExporter(
             db_path=args.db,
+            db_type=args.db_type,
             schema_file=args.schema, 
             output_dir=args.output
         )

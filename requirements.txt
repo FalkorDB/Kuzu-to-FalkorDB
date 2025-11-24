@@ -1,6 +1,16 @@
 # Requirements for kuzu_to_falkordb_export.py
-# Kuzu database Python client
+# Graph database Python clients (install at least one)
+
+# Option 1: Kuzu database
 kuzu>=0.0.8
+
+# Option 2: LadybugDB (uncomment if using LadybugDB)
+# Note: LadybugDB was formerly Kuzu and may be compatible
+# ladybug-db>=1.0.0
+
+# Note: You only need to install ONE of the above database libraries
+# The script will auto-detect which one is available, or you can
+# specify explicitly with --db-type kuzu or --db-type ladybug
 
 # Standard library dependencies (included with Python):
 # - os
