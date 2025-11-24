@@ -169,6 +169,7 @@ class GraphToFalkorDBExporter:
         test_patterns = [
             "CONNECTS", "CONTAINS", "DEPENDS_ON", "EXPOSES", "HOLDS", "INSTANCE", 
             "LISTENS", "PREVIOUS", "ROUTES", "RUNS", "TYPE", "VERSION",
+            "HOSTS", "BELONGS_TO", "HAS", "USES", "LINKS",
             "CONNECTS_NET", "CONNECTS_INTERFACE", "CONTAINS_RACK", "CONTAINS_ROUTER",
             "DEPENDS_SERVICE", "DEPENDS_VERSION", "DEPENDS_SOFTWARE", 
             "HOLDS_MACHINE", "HOLDS_SWITCH", "INSTANCE_OS_VER", "INSTANCE_APP_SW",
@@ -207,6 +208,10 @@ class GraphToFalkorDBExporter:
             return 'EXPOSES'
         elif 'HOLD' in rel:
             return 'HOLDS'
+        elif 'HOST' in rel:
+            return 'HOSTS'
+        elif 'BELONG' in rel:
+            return 'BELONGS_TO'
         elif 'INSTANCE' in rel:
             return 'INSTANCE'
         elif 'LISTEN' in rel:
@@ -221,6 +226,12 @@ class GraphToFalkorDBExporter:
             return 'TYPE'
         elif 'VERSION' in rel:
             return 'VERSION'
+        elif 'LINK' in rel:
+            return 'LINKS'
+        elif 'USE' in rel:
+            return 'USES'
+        elif rel == 'HAS':
+            return 'HAS'
         else:
             # For unknown relationships, use the original name
             return rel
