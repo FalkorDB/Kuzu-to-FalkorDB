@@ -150,8 +150,4 @@ For additional debugging information, you can modify the script to include more 
 
 ## License
 
-[Add your license information here]
-
-## Author
-
-[Add author information here]
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
